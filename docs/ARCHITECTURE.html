@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Blueprint – Soft Power Lab</title>
+<style>
+  :root {
+    --bg: #0b0a1a;
+    --card: #13112b;
+    --border: #2a2744;
+    --gold: #ffd93d;
+    --cyan: #4ecdc4;
+    --red: #ff6b6b;
+    --purple: #a29bfe;
+    --green: #55efc4;
+    --text: #d4d4e0;
+    --dim: #6e6b8a;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', 'Fira Code', monospace, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 0;
+    line-height: 1.7;
+  }
+
+  /* ── HERO ──────────────────────────── */
+  .hero {
+    text-align: center;
+    padding: 48px 20px 32px;
+    background: linear-gradient(180deg, #1a1440 0%, #0b0a1a 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 2.4rem;
+    background: linear-gradient(90deg, var(--red), var(--cyan), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero p {
+    margin-top: 6px;
+    color: var(--dim);
+    font-size: 1rem;
+  }
+
+  /* ── CONTAINER ─────────────────────── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 32px 20px;
+  }
+  h2 {
+    font-size: 1.5rem;
+    margin: 40px 0 20px;
+    padding-left: 12px;
+    border-left: 4px solid var(--cyan);
+    color: var(--cyan);
+  }
+  h3 {
+    font-size: 1.15rem;
+    color: var(--gold);
+    margin: 24px 0 10px;
+  }
+
+  /* ── DIAGRAM (ASCII-style boxes) ──── */
+  .diagram {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 20px;
+    overflow-x: auto;
+  }
+  .arch {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    white-space: pre;
+    font-family: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.78rem;
+    line-height: 1.3;
+    color: #8be9fd;
+  }
+  .arch .l1 { color: var(--red); }
+  .arch .l2 { color: var(--gold); }
+  .arch .l3 { color: var(--cyan); }
+  .arch .l4 { color: var(--purple); }
+  .arch .l5 { color: var(--green); }
+  .arch .dim { opacity: 0.4; }
+  .arch .b { font-weight: bold; }
+
+  /* ── LAYER CARDS ───────────────────── */
+  .layers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .card h4 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+  .card ul {
+    list-style: none;
+    padding: 0;
+  }
+  .card li {
+    padding: 3px 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+  }
+  .tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-right: 4px;
+  }
+  .tag.rs  { background: #e17055; color: #000; }
+  .tag.ts  { background: #3178c6; color: #fff; }
+  .tag.js  { background: var(--gold); color: #000; }
+  .tag.py  { background: #306998; color: #fff; }
+  .tag.css { background: var(--purple); color: #000; }
+
+  /* ── DATA FLOW ─────────────────────── */
+  .flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .flow-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    text-align: center;
+    font-size: 0.85rem;
+    min-width: 100px;
+  }
+  .flow-arrow {
+    font-size: 1.5rem;
+    color: var(--cyan);
+  }
+
+  /* ── I18N TABLE ────────────────────── */
+  table.i18n {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  table.i18n th, table.i18n td {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  table.i18n th {
+    background: rgba(255,255,255,0.04);
+    color: var(--gold);
+  }
+
+  /* ── RESPONSIVE ────────────────────── */
+  @media (max-width: 700px) {
+    .hero h1 { font-size: 1.4rem; }
+    .arch { font-size: 0.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header class="hero">
+  <h1>Computational Soft Power & Societal Dynamics Laboratory</h1>
+  <p>Complete Architecture Blueprint — v0.1.0</p>
+</header>
+
+<div class="container">
+
+<!-- ══════ HIGH-LEVEL ARCHITECTURE ══════ -->
+<h2>1.  High-Level Architecture (Stack Layers)</h2>
+<div class="diagram">
+<pre class="arch">
+<span class="l1 b">┌─────────────────────────────────────────────────────────┐</span>
+<span class="l1 b">│                🖥️  VISUALIZATION LAYER                  │</span>
+<span class="l1 b">│    React 18  ·  TypeScript  ·  PixiJS  ·  CSS Grid      │</span>
+<span class="l1 b">│    Entry: main.tsx → App.tsx                             │</span>
+<span class="l1 b">├─────────────────────────────────────────────────────────┤</span>
+<span class="l1 dim">│  Components:  ControlPanel  │  Simulator  │  MetricsDisp │</span>
+<span class="l1 dim">│  + LanguageSwitcher  (9 languages · RTL support)         │</span>
+<span class="l1 dim">├─────────────────────────────────────────────────────────┤</span>
+<span class="l2 b">│               🌐  I18N / INTERNATIONALIZATION            │</span>
+<span class="l2 b">│  I18nProvider (Context)  ·  useTranslation() Hook        │</span>
+<span class="l2 b">│  ar · en · pt · fa · tr · zh · hi · ru · de             │</span>
+<span class="l2 b">├─────────────────────────────────────────────────────────┤</span>
+<span class="l3 b">│              ⚙️  SIMULATION STATE (React)                │</span>
+<span class="l3 b">│  useSimulation()  ·  setInterval loop  ·  useState       │</span>
+<span class="l3 b">│  Metrics × 11  ·  Theories × 14  ·  AgentCount slider    │</span>
+<span class="l3 b">├─────────────────────────────────────────────────────────┤</span>
+<span class="l4 b">│                  🧠  THEORY ENGINE                       │</span>
+<span class="l4 b">│  Toggle on/off at runtime  ·  Plugin architecture        │</span>
+<span class="l4 b">│  Soft Power · Hegemony · Diffusion · Identity ·          │</span>
+<span class="l4 b">│  Spiral of Silence · Consent · Agenda · Contagion ·      │</span>
+<span class="l4 b">│  Memetic · Echo Chamber · Radicalisation ·               │</span>
+<span class="l4 b">│  Prestige · Attention Economy · Algorithmic Amplif.      │</span>
+<span class="l4 b">├─────────────────────────────────────────────────────────┤</span>
+<span class="l5 b">│                🦀  RUST ENGINE (WASM)                     │</span>
+<span class="l5 b">│  crate: soft_power_engine  ·  wasm-bindgen               │</span>
+<span class="l5 b">│  Modules: agents · core · network · media ·              │</span>
+<span class="l5 b">│  theories · statistics · events · runtime                │</span>
+<span class="l5 b">│  → JavaScript Fallback when WASM unavailable             │</span>
+<span class="l5 dim">└─────────────────────────────────────────────────────────┘</span>
+</pre>
+</div>
+
+<!-- ══════ DATA FLOW ══════ -->
+<h2>2.  Data Flow & Component Tree</h2>
+<div class="flow">
+  <div class="flow-box"><b>main.tsx</b><br><span class="tag ts">TSX</span> entry</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box"><b>I18nProvider</b><br><span class="tag ts">CTX</span> wraps app</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box"><b>App.tsx</b><br><span class="tag ts">TSX</span> state hub</div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box" style="display:flex;flex-direction:column;gap:6px;">
+    <span>↳ <b>ControlPanel</b></span>
+    <span>↳ <b>Simulator</b></span>
+    <span>↳ <b>MetricsDisplay</b></span>
+    <span>↳ <b>LanguageSwitcher</b></span>
+  </div>
+</div>
+
+<div style="text-align:center;margin:16px 0 24px;">
+  <pre style="display:inline-block;text-align:left;color:var(--dim);font-size:0.8rem;">
+ User clicks <b style="color:var(--cyan)">Start</b>
+      │
+      ▼
+ <b style="color:var(--gold)">App.tsx</b> → setState(isRunning: true)
+      │
+      ├──▶ <b style="color:var(--purple)">WASM world.step()</b>  (if available)
+      │         └── returns: tick, agentCount, 11 metrics
+      │
+      └──▶ <b style="color:var(--green)">JS Fallback</b>  random-walk simulation
+                └── returns: tick+1, metrics noise
+      │
+      ▼
+ <b style="color:var(--red)">Metrics</b> pumped into  <b>Simulator</b> (canvas) + <b>MetricsDisplay</b> (bars)
+  </pre>
+</div>
+
+<!-- ══════ COMPONENT DETAILS ══════ -->
+<h2>3.  Component Breakdown</h2>
+<div class="layers">
+
+  <div class="card">
+    <h4>🧩 App.tsx <span class="tag ts">TSX</span></h4>
+    <ul>
+      <li>Central state: <code>SimulationState</code></li>
+      <li>Manages <code>useState</code> + <code>useEffect</code> loop</li>
+      <li>WASM loader via <code>new Function('path', 'return import(path)')</code></li>
+      <li>Passes translated theory names to <b>ControlPanel</b></li>
+      <li>14 theories defined as <code>THEORY_KEY_ORDER</code></li>
+      <li>JS fallback: stochastic random-walk metrics</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>🎮 ControlPanel <span class="tag ts">TSX</span></h4>
+    <ul>
+      <li>▶ Start / ⏸ Pause / ↻ Reset buttons</li>
+      <li>Tick counter · Agent count display</li>
+      <li>14 theory checkboxes (fully translated)</li>
+      <li>Agent slider (10–1000) · Speed selector (4 presets)</li>
+      <li>Export section (JSON / CSV / Summary)</li>
+      <li>Color-coded legend</li>
+      <li>Powered by <code>useTranslation()</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>🗺️ Simulator <span class="tag ts">TSX</span> <span class="tag js">Canvas</span></h4>
+    <ul>
+      <li>HTML5 Canvas 1000×600 @ up to 500 agents</li>
+      <li>Random-walk physics with polarization clustering</li>
+      <li>Agent colors: red (aggressive) ↔ teal (calm)</li>
+      <li>Influencers (5%) in gold with red outline</li>
+      <li>Network lines between nearby agents</li>
+      <li>HUD overlay: tick, agent count, polarization%, cohesion%</li>
+      <li><code>requestAnimationFrame</code> loop</li>
+      <li>All labels via <code>t.simulator.*</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>📊 MetricsDisplay <span class="tag ts">TSX</span></h4>
+    <ul>
+      <li>3 categories: Social · Cultural · Media</li>
+      <li>11 metric bars with color-coded % values</li>
+      <li>Health indicator: 🟢 Healthy / 🟡 Warning / 🔴 Critical</li>
+      <li>Summary table: Metric · Value · Status</li>
+      <li>Ordered via <code>METRIC_ORDER</code> array</li>
+      <li>All labels via <code>t.metrics.*</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>🌐 LanguageSwitcher <span class="tag ts">TSX</span></h4>
+    <ul>
+      <li><code><select></code> dropdown with flag emoji + language name</li>
+      <li>9 locales: ar · en · pt · fa · tr · zh · hi · ru · de</li>
+      <li>Persists to <code>localStorage('soft-power-lab-locale')</code></li>
+      <li>Auto-detects <code>navigator.language</code></li>
+      <li>Fires <code>setLocale()</code> → updates Context → re-renders all</li>
+    </ul>
+  </div>
+
+</div>
+
+<!-- ══════ I18N SYSTEM ══════ -->
+<h2>4.  I18N System (Internationalization)</h2>
+<table class="i18n">
+  <thead>
+    <tr>
+      <th>File</th>
+      <th>Role</th>
+      <th>Key Types</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>i18n/types.ts</code></td>
+      <td>TypeScript interface <code>Translations</code> + unions (<code>Locale</code>, <code>TheoryKey</code>, <code>MetricKey</code>…)</td>
+      <td><span class="tag ts">Types</span></td>
+    </tr>
+    <tr>
+      <td><code>i18n/index.tsx</code></td>
+      <td>React Context Provider + <code>useTranslation()</code> hook + RTL auto-detect</td>
+      <td><span class="tag ts">React</span></td>
+    </tr>
+    <tr>
+      <td><code>i18n/locales/en.ts</code></td>
+      <td>English (default) — reference translation</td>
+      <td><span class="tag js">Data</span></td>
+    </tr>
+    <tr>
+      <td><code>i18n/locales/ar.ts</code></td>
+      <td>العربية الفصحى — RTL, fully translated</td>
+      <td><span class="tag js">Data</span></td>
+    </tr>
+    <tr>
+      <td><code>i18n/locales/fa.ts</code></td>
+      <td>فارسی — RTL, fully translated</td>
+      <td><span class="tag js">Data</span></td>
+    </tr>
+    <tr>
+      <td><code>i18n/locales/{pt,tr,zh,hi,ru,de}.ts</code></td>
+      <td>Portuguese · Turkish · Chinese · Hindi · Russian · German</td>
+      <td><span class="tag js">Data</span></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>How to add a new language:</h3>
+<div class="card" style="max-width:700px;">
+  <ol style="padding-left:20px;font-size:0.85rem;">
+    <li>Copy <code>locales/en.ts</code> → <code>locales/xx.ts</code></li>
+    <li>Translate every string key</li>
+    <li>Add to <code>Locales</code> union in <code>types.ts</code></li>
+    <li>Add entry in <code>LOCALE_LABELS</code> + <code>FLAG_EMOJI</code></li>
+    <li>Import in <code>index.tsx</code> + add to <code>LOCALE_MAP</code></li>
+    <li>TypeScript will error if any key is missing → <b>compile-time safety</b></li>
+  </ol>
+</div>
+
+<!-- ══════ RUST ENGINE ══════ -->
+<h2>5.  Rust Engine (engine/)</h2>
+<div class="card">
+  <h4>🦀 Cargo.toml <span class="tag rs">Rust</span></h4>
+  <pre style="font-size:0.8rem;">
+[package] name = "soft_power_engine"
+[dependencies]
+  rand · serde · serde_json · petgraph · rayon
+  log · thiserror · wasm-bindgen · console_error_panic_hook
+[lib] crate-type = ["cdylib", "rlib"]
+  </pre>
+</div>
+<div class="layers" style="margin-top:12px;">
+  <div class="card">
+    <h4>src/lib.rs</h4>
+    <p style="font-size:0.82rem;">Module re-exports — public API surface</p>
+  </div>
+  <div class="card">
+    <h4>src/wasm.rs</h4>
+    <p style="font-size:0.82rem;">WASM bridge: <code>WasmWorld</code> class with getters/setters for JS interop</p>
+  </div>
+  <div class="card">
+    <h4>src/core/</h4>
+    <p style="font-size:0.82rem;">Scheduler · World state · Tick management</p>
+  </div>
+  <div class="card">
+    <h4>src/agents/</h4>
+    <p style="font-size:0.82rem;">AgentMind (12 traits) · IdentityMatrix · Capital (Bourdieu)</p>
+  </div>
+  <div class="card">
+    <h4>src/theories/</h4>
+    <p style="font-size:0.82rem;">Trait-based plugin architecture — 14 theories as trait impls</p>
+  </div>
+  <div class="card">
+    <h4>src/network/</h4>
+    <p style="font-size:0.82rem;">petgraph — dynamic social graph · edge weighting · clustering</p>
+  </div>
+  <div class="card">
+    <h4>src/media/</h4>
+    <p style="font-size:0.82rem;">Recommendation algorithms · propaganda · narrative systems</p>
+  </div>
+  <div class="card">
+    <h4>src/statistics/</h4>
+    <p style="font-size:0.82rem;">11 metrics · export (CSV/JSON/Parquet) · snapshot</p>
+  </div>
+  <div class="card">
+    <h4>src/events/</h4>
+    <p style="font-size:0.82rem;">Event bus — systemic changes broadcast</p>
+  </div>
+  <div class="card">
+    <h4>src/runtime/</h4>
+    <p style="font-size:0.82rem;">Simulation lifecycle · concurrency · state snapshots</p>
+  </div>
+</div>
+
+<!-- ══════ FILE TREE ══════ -->
+<h2>6.  Complete Project Tree</h2>
+<div class="diagram"><pre style="font-size:0.74rem;color:var(--text);">
+soft-power-lab/
+│
+├── engine/                          <span class="dim">🦀 Rust simulation core</span>
+│   ├── Cargo.toml
+│   ├── Cargo-wasm.toml
+│   └── src/
+│       ├── lib.rs                   <span class="dim">Module hub</span>
+│       ├── mod.rs
+│       ├── wasm.rs                  <span class="dim">WASM JS bridge</span>
+│       ├── tests.rs
+│       ├── agents/                  <span class="dim">Autonomous agent models</span>
+│       ├── core/                    <span class="dim">World · Scheduler</span>
+│       ├── events/                  <span class="dim">Event propagation</span>
+│       ├── media/                   <span class="dim">Media layer</span>
+│       ├── network/                 <span class="dim">Social graph (petgraph)</span>
+│       ├── runtime/                 <span class="dim">Lifecycle management</span>
+│       ├── statistics/              <span class="dim">Metrics + export</span>
+│       ├── theories/                <span class="dim">14 theory plugins</span>
+│       └── utils/
+│
+├── apps/web-client/                 <span class="dim">🌐 React frontend</span>
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── vite.config.ts
+│   ├── index.html                   <span class="dim">Entry HTML</span>
+│   └── src/
+│       ├── main.tsx                 <span class="dim">React root + I18nProvider</span>
+│       ├── App.tsx                  <span class="dim">State manager + layout</span>
+│       ├── App.css                  <span class="dim">Global styles</span>
+│       ├── index.css
+│       ├── i18n/
+│       │   ├── types.ts             <span class="dim">TypeScript interfaces</span>
+│       │   ├── index.tsx            <span class="dim">Provider + Hook</span>
+│       │   └── locales/
+│       │       ├── en.ts · ar.ts · pt.ts · fa.ts · tr.ts
+│       │       ├── zh.ts · hi.ts · ru.ts · de.ts
+│       └── components/
+│           ├── ControlPanel.tsx     <span class="dim">Sidebar controls</span>
+│           ├── Simulator.tsx        <span class="dim">Canvas renderer</span>
+│           ├── MetricsDisplay.tsx   <span class="dim">11 live metric bars</span>
+│           └── LanguageSwitcher.tsx <span class="dim">9-language dropdown</span>
+│
+├── apps/desktop-client/            <span class="dim">🖥️ Tauri desktop app</span>
+├── apps/research-console/          <span class="dim">🔬 Research analytics</span>
+├── python/                         <span class="dim">🐍 Scientific analysis</span>
+├── benchmarks/                     <span class="dim">⚡ Performance tests</span>
+├── configs/                        <span class="dim">⚙️ Configuration files</span>
+├── docs/                           <span class="dim">📖 Documentation</span>
+├── tests/                          <span class="dim">🧪 Integration tests</span>
+├── Makefile
+├── docker-compose.yml
+├── build.sh
+└── read.md
+</pre></div>
+
+<!-- ══════ THEORIES ══════ -->
+<h2>7.  Theory Catalog (14 Theories)</h2>
+<table class="i18n">
+  <thead>
+    <tr><th>#</th><th>Theory Key</th><th>English</th><th>العربية</th><th>Author</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>softPower</td><td>Soft Power</td><td>القوة الناعمة</td><td>Joseph Nye</td></tr>
+    <tr><td>2</td><td>culturalHegemony</td><td>Cultural Hegemony</td><td>الهيمنة الثقافية</td><td>Gramsci</td></tr>
+    <tr><td>3</td><td>diffusionOfInnovations</td><td>Diffusion of Innovations</td><td>انتشار الابتكارات</td><td>Rogers</td></tr>
+    <tr><td>4</td><td>socialIdentity</td><td>Social Identity</td><td>الهوية الاجتماعية</td><td>Tajfel</td></tr>
+    <tr><td>5</td><td>spiralOfSilence</td><td>Spiral of Silence</td><td>دوامة الصمت</td><td>Noelle-Neumann</td></tr>
+    <tr><td>6</td><td>manufacturingConsent</td><td>Manufacturing Consent</td><td>صناعة الرضا</td><td>Chomsky</td></tr>
+    <tr><td>7</td><td>agendaSetting</td><td>Agenda Setting</td><td>ترتيب الأولويات</td><td>McCombs</td></tr>
+    <tr><td>8</td><td>networkContagion</td><td>Network Contagion</td><td>العدوى الشبكية</td><td>Centola</td></tr>
+    <tr><td>9</td><td>memetic</td><td>Memetic</td><td>الميمات</td><td>Dawkins</td></tr>
+    <tr><td>10</td><td>echoChamber</td><td>Echo Chamber</td><td>غرفة الصدى</td><td>Sunstein</td></tr>
+    <tr><td>11</td><td>radicalization</td><td>Radicalization</td><td>التطرف</td><td>McCauley</td></tr>
+    <tr><td>12</td><td>prestigeInfluence</td><td>Prestige Influence</td><td>تأثير الهيبة</td><td>Henrich</td></tr>
+    <tr><td>13</td><td>attentionEconomy</td><td>Attention Economy</td><td>اقتصاد الانتباه</td><td>Simon</td></tr>
+    <tr><td>14</td><td>algorithmicAmplification</td><td>Algorithmic Amplification</td><td>التضخيم الخوارزمي</td><td>Pariser</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════ 11 METRICS ══════ -->
+<h2>8.  11 Real-Time Metrics</h2>
+<table class="i18n">
+  <thead>
+    <tr><th>#</th><th>Metric Key</th><th>English</th><th>العربية</th><th>Category</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>polarization</td><td>Polarization Index</td><td>مؤشر الاستقطاب</td><td>🏛️ Social</td></tr>
+    <tr><td>2</td><td>cohesion</td><td>Cohesion Score</td><td>درجة التماسك</td><td>🏛️ Social</td></tr>
+    <tr><td>3</td><td>identityFragmentation</td><td>Identity Fragmentation</td><td>تجزئة الهوية</td><td>🏛️ Social</td></tr>
+    <tr><td>4</td><td>resistanceStrength</td><td>Resistance Strength</td><td>قوة المقاومة</td><td>🏛️ Social</td></tr>
+    <tr><td>5</td><td>memeticVelocity</td><td>Memetic Velocity</td><td>سرعة الميمات</td><td>🧬 Cultural</td></tr>
+    <tr><td>6</td><td>narrativeVolatility</td><td>Narrative Volatility</td><td>تقلب السرديات</td><td>🧬 Cultural</td></tr>
+    <tr><td>7</td><td>beliefAdoption</td><td>Belief Adoption</td><td>تبني المعتقدات</td><td>🧬 Cultural</td></tr>
+    <tr><td>8</td><td>ideologicalEntropy</td><td>Ideological Entropy</td><td>الانتروبيا الأيديولوجية</td><td>🧬 Cultural</td></tr>
+    <tr><td>9</td><td>echoDensity</td><td>Echo Density</td><td>كثافة الصدى</td><td>📡 Media</td></tr>
+    <tr><td>10</td><td>eliteDominance</td><td>Elite Dominance</td><td>هيمنة النخبة</td><td>📡 Media</td></tr>
+    <tr><td>11</td><td>algorithmicCapture</td><td>Algorithmic Capture</td><td>الاستحواذ الخوارزمي</td><td>📡 Media</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════ TECH STACK TABLE ══════ -->
+<h2>9.  Technology Stack</h2>
+<table class="i18n">
+  <thead><tr><th>Layer</th><th>Technology</th><th>Rationale</th></tr></thead>
+  <tbody>
+    <tr><td>Core Engine</td><td>Rust</td><td>Speed + memory safety + WASM target</td></tr>
+    <tr><td>Browser Runtime</td><td>WebAssembly (wasm-bindgen)</td><td>Native-like performance in browser</td></tr>
+    <tr><td>UI Framework</td><td>React 18 + TypeScript</td><td>Complex reactive UI management</td></tr>
+    <tr><td>Canvas Rendering</td><td>HTML5 Canvas 2D</td><td>Up to 500 agents @ 60fps</td></tr>
+    <tr><td>Graph Processing</td><td>petgraph (Rust)</td><td>High-performance network analysis</td></tr>
+    <tr><td>State Management</td><td>React Hooks (useState / useEffect)</td><td>Local component state</td></tr>
+    <tr><td>I18N</td><td>React Context + TypeScript</td><td>Compile-time-safe translations</td></tr>
+    <tr><td>Build Tool</td><td>Vite 5</td><td>Fast HMR + TypeScript out-of-box</td></tr>
+    <tr><td>Parallelism</td><td>rayon (Rust) + Web Workers (planned)</td><td>Multi-threaded simulation</td></tr>
+    <tr><td>Scientific Analysis</td><td>Python (notebooks, pandas, matplotlib)</td><td>Research workflows</td></tr>
+    <tr><td>Data Export</td><td>JSON / CSV / Parquet</td><td>Academic data sharing</td></tr>
+    <tr><td>Containerization</td><td>Docker Compose</td><td>Reproducible environments</td></tr>
+  </tbody>
+</table>
+
+<!-- ══════ FOOTER ══════ -->
+<div style="text-align:center;padding:40px 0 20px;color:var(--dim);font-size:0.8rem;">
+  <p>🧪 Soft Power Lab · Architecture Blueprint · May 2024</p>
+  <p><code>apps/web-client/src/</code> — 15 source files · 9 locales · 3 components</p>
+</div>
+
+</div><!-- container -->
+</body>
+</html>

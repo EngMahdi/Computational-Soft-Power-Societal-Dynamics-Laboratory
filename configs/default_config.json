@@ -1,0 +1,97 @@
+{
+  "simulation": {
+    "name": "Default Soft Power Simulation",
+    "description": "Research-grade simulation of soft power dynamics",
+    "agent_count": 100,
+    "max_ticks": 10000,
+    "seed": 12345,
+    "update_interval": 50
+  },
+
+  "agents": {
+    "psychological_traits": {
+      "openness_range": [0.1, 0.9],
+      "skepticism_range": [0.1, 0.9],
+      "tribalism_range": [0.1, 0.9],
+      "ideological_rigidity_range": [0.1, 0.9]
+    },
+    "identity": {
+      "identity_sensitivity": 0.8,
+      "identity_reinforcement_rate": 0.05
+    }
+  },
+
+  "theories": {
+    "enabled_theories": [
+      "soft_power",
+      "social_identity",
+      "echo_chamber",
+      "network_contagion",
+      "algorithmic_amplification"
+    ],
+    "weights": {
+      "soft_power": 0.8,
+      "cultural_hegemony": 0.6,
+      "diffusion_of_innovations": 0.7,
+      "social_identity": 0.9,
+      "spiral_of_silence": 0.7,
+      "manufacturing_consent": 0.8,
+      "agenda_setting": 0.6,
+      "network_contagion": 0.85,
+      "memetic": 0.7,
+      "echo_chamber": 0.95,
+      "radicalization": 0.8,
+      "prestige_influence": 0.75,
+      "attention_economy": 0.7,
+      "algorithmic_amplification": 0.85
+    }
+  },
+
+  "network": {
+    "initial_connection_probability": 0.15,
+    "relationship_decay_rates": {
+      "family": 0.001,
+      "friends": 0.005,
+      "work": 0.01,
+      "religious": 0.008,
+      "political": 0.012,
+      "digital": 0.02,
+      "prestige": 0.015,
+      "media_following": 0.025,
+      "tribal": 0.008,
+      "educational": 0.015
+    }
+  },
+
+  "media": {
+    "feed_size": 20,
+    "recommendation_algorithm": {
+      "engagement_weight": 0.4,
+      "emotional_weight": 0.35,
+      "confirmation_weight": 0.2,
+      "diversity_penalty": 0.05
+    },
+    "content_creation_rate": 0.1
+  },
+
+  "statistics": {
+    "calculation_interval": 10,
+    "export_format": "json",
+    "metrics_to_track": [
+      "polarization_index",
+      "cohesion_score",
+      "echo_density",
+      "belief_adoption",
+      "identity_fragmentation",
+      "elite_dominance",
+      "resistance_strength"
+    ]
+  },
+
+  "visualization": {
+    "agent_size": 3,
+    "network_opacity": 0.6,
+    "color_scheme": "diverging",
+    "update_frequency": 30
+  }
+}

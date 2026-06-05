@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Rust Engine (build only)
+  engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.engine
+    volumes:
+      - ./engine:/app/engine
+      - cargo-cache:/usr/local/cargo/registry
+    working_dir: /app/engine
+    command: cargo build --release
+
+  # Web Client Development Server
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/web-client:/app
+      - /app/node_modules
+    working_dir: /app
+    command: npm run dev
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+
+  # Python Analysis Environment
+  python:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    volumes:
+      - ./python:/app/python
+      - ./exports:/app/exports
+    working_dir: /app/python
+    ports:
+      - "8888:8888"
+    command: jupyter lab --ip=0.0.0.0
+
+  # PostgreSQL for data storage (optional)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: softpower_lab
+      POSTGRES_USER: research
+      POSTGRES_PASSWORD: research123
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  cargo-cache:
+  postgres-data:

@@ -1,0 +1,10 @@
+[package.metadata.wasm]
+profile = "release"
+
+[lib]
+name = "soft_power_wasm"
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "z"
+lto = true
