@@ -52,12 +52,27 @@ env/
 *.sublime-workspace
 *.sublime-project
 
-# Project specific
+# Project specific — block data exports only
 /exports/
 /data/
 *.csv
-*.json
 *.parquet
+
+# Block only data/export json files, NOT project config files
+/data/*.json
+/exports/*.json
+
+# Explicitly allow all project config JSON files
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig*.json
+!vite.config.json
+!vercel.json
+!**/package.json
+!**/package-lock.json
+!**/tsconfig.json
+!**/vercel.json
 !docs/*.json
 !configs/*.json
 
