@@ -766,3 +766,113 @@ export function getAIManagerBudget() {
 export function setAIParallelEnabled(val: boolean): void {
   globalAIRequestManager.setParallelEnabled(val);
 }
+
+// ─────────────────────────────────────────────────────────────
+// توليد نصوص حرة (للملخصات الأكاديمية والتقارير)
+// ─────────────────────────────────────────────────────────────
+
+export async function callAIText(prompt: string, config: AIConfig, systemInstruction = ''): Promise<string> {
+  const provider = config.provider;
+
+  if (provider === 'none') {
+    throw new Error('AI provider is not configured.');
+  }
+
+  if (provider === 'ollama') {
+    const res = await fetch(`${config.ollamaUrl || 'http://localhost:11434'}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: config.ollamaModel,
+        prompt: systemInstruction ? `${systemInstruction}\n\n${prompt}` : prompt,
+        stream: false,
+        options: { temperature: 0.4, num_predict: 2000 },
+      }),
+      signal: AbortSignal.timeout(120000),
+    });
+    if (!res.ok) throw new Error(`Ollama HTTP ${res.status}`);
+    const data = await res.json() as { response: string };
+    return data.response.trim();
+  }
+
+  if (provider === 'gemini') {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${config.geminiModel}:generateContent?key=${config.apiKey}`;
+    const body: any = {
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.4, maxOutputTokens: 2000 },
+    };
+    if (systemInstruction) {
+      body.systemInstruction = { parts: [{ text: systemInstruction }] };
+    }
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(120000),
+    });
+    if (!res.ok) throw new Error(`Gemini HTTP ${res.status}`);
+    const data = await res.json() as any;
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+  }
+
+  if (provider === 'anthropic') {
+    const body = {
+      model: 'claude-3-haiku-20240307',
+      max_tokens: 2000,
+      system: systemInstruction || undefined,
+      messages: [{ role: 'user', content: prompt }],
+    };
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': config.apiKey, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(120000),
+    });
+    if (!res.ok) throw new Error(`Anthropic HTTP ${res.status}`);
+    const data = await res.json() as any;
+    return data.content?.[0]?.text?.trim() || '';
+  }
+
+  // fallback for openai, openrouter, groq, custom
+  let url = '';
+  let model = '';
+  let apiKey = config.apiKey;
+
+  if (provider === 'openai') {
+    url = 'https://api.openai.com/v1/chat/completions';
+    model = 'gpt-4o-mini';
+  } else if (provider === 'openrouter') {
+    url = 'https://openrouter.ai/api/v1/chat/completions';
+    model = config.openrouterModel || 'openai/gpt-4o-mini';
+  } else if (provider === 'groq') {
+    url = 'https://api.groq.com/openai/v1/chat/completions';
+    model = 'llama3-8b-8192';
+  } else if (provider === 'custom') {
+    url = config.customUrl;
+    model = config.customModel;
+    apiKey = config.customApiKey;
+  }
+
+  const messages = [];
+  if (systemInstruction) messages.push({ role: 'system', content: systemInstruction });
+  messages.push({ role: 'user', content: prompt });
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.4,
+      max_tokens: 2000,
+    }),
+    signal: AbortSignal.timeout(120000),
+  });
+  
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json() as any;
+  return data.choices?.[0]?.message?.content?.trim() || '';
+}

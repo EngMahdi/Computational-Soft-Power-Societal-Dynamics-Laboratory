@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from '../i18n';
+import { callAIText } from '../simulation/aiRouter';
 import type { MetricsSnapshot } from '../utils/dataExport';
 import type { AIConfig } from '../simulation/aiRouter';
 
@@ -238,6 +239,7 @@ export default function ReportModal({ data, aiConfig, onClose }: ReportModalProp
   const [isGenerating, setIsGenerating] = useState(false);
   const [genError,     setGenError]     = useState('');
   const [activeChart,  setActiveChart]  = useState<'overview' | 'stability' | 'influence' | 'states'>('overview');
+  const [localProvider, setLocalProvider] = useState<AIConfig['provider']>(aiConfig.provider);
   
   // Time Range Selection
   const [startTick, setStartTick] = useState<number>(data.snapshots[0]?.tick || 0);
@@ -315,24 +317,10 @@ Write the report including:
 4. Academic recommendations for public policies (Policy Implications).`;
 
     try {
-      const ollamaUrl = aiConfig.ollamaUrl || 'http://localhost:11434';
-      const model     = aiConfig.ollamaModel || 'gpt-oss:120b-cloud';
-
-      const res = await fetch(`${ollamaUrl}/api/generate`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          model,
-          prompt,
-          stream: false,
-          options: { temperature: 0.4, num_predict: 800 },
-        }),
-        signal: AbortSignal.timeout(120000),
-      });
-
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const result = await res.json() as { response: string };
-      setAiSummary(result.response.trim());
+      const configOverride: AIConfig = { ...aiConfig, provider: localProvider };
+      const systemInst = `You are a political sociologist and expert academic researcher. Respond strictly in ${aiLanguage} without JSON formatting.`;
+      const result = await callAIText(prompt, configOverride, systemInst);
+      setAiSummary(result);
     } catch (err) {
       setGenError(err instanceof Error ? err.message : t.reportModal.genError);
     } finally {
@@ -639,8 +627,26 @@ Write the report including:
 
           {/* ── AI Academic Summary | ملخص الذكاء الاصطناعي ── */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
               <SectionTitle>🤖 {t.reportModal.aiSummaryTitle}</SectionTitle>
+              <select 
+                value={localProvider} 
+                onChange={e => setLocalProvider(e.target.value as AIConfig['provider'])}
+                style={{
+                  background: '#0a1628', color: '#f8fafc', border: '1px solid #1e3a5f',
+                  borderRadius: 4, padding: '2px 6px', fontSize: 11, outline: 'none',
+                  cursor: 'pointer'
+                }}
+              >
+                <option value="none">بدون ذكاء اصطناعي</option>
+                <option value="gemini">Gemini</option>
+                <option value="openrouter">OpenRouter</option>
+                <option value="anthropic">Anthropic (Claude)</option>
+                <option value="openai">OpenAI</option>
+                <option value="groq">Groq</option>
+                <option value="ollama">Ollama (Local)</option>
+                <option value="custom">Custom Endpoint</option>
+              </select>
               {(aiSummary || genError) && (
                 <button className="no-print" onClick={generateSummary} disabled={isGenerating}
                   style={{

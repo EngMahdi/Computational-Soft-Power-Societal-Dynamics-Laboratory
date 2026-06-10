@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { InspectableAgent } from './AgentInspector';
-import type { AIConfig } from '../simulation/aiRouter';
+import { callAIText, type AIConfig } from '../simulation/aiRouter';
 import { Ledger } from '../simulation/research/LedgerSystem';
 import { useTranslation } from '../i18n';
 
@@ -16,6 +16,7 @@ export default function AgentHistoryModal({ agent, aiConfig, onClose }: AgentHis
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [localProvider, setLocalProvider] = useState<AIConfig['provider']>(aiConfig.provider);
 
   useEffect(() => {
     // جلب السجل من 0 إلى 999999
@@ -35,23 +36,11 @@ export default function AgentHistoryModal({ agent, aiConfig, onClose }: AgentHis
       prompt = prompt.replace('{rigidity}', (agent.mind?.ideological_rigidity || 0).toFixed(2));
       prompt = prompt.replace('{critical_thinking}', (agent.mind?.critical_thinking || 0).toFixed(2));
 
-      const ollamaUrl = aiConfig.ollamaUrl || 'http://localhost:11434';
-      const model = aiConfig.ollamaModel || 'gpt-oss-120b-cloud';
-
-      const res = await fetch(`${ollamaUrl}/api/generate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model,
-          prompt,
-          stream: false,
-          options: { temperature: 0.5, num_predict: 2000 },
-        }),
-      });
-
-      if (!res.ok) throw new Error(t.agentHistory.errorConnection);
-      const data = await res.json();
-      setAiSummary(data.response.trim());
+      const configOverride: AIConfig = { ...aiConfig, provider: localProvider };
+      const systemInst = `You are a psychological and sociological AI profiling agent. Answer strictly in your language based on the prompt. Do not use JSON formatting.`;
+      
+      const result = await callAIText(prompt, configOverride, systemInst);
+      setAiSummary(result);
     } catch (err: any) {
       setError(err.message || t.agentHistory.errorGeneric);
     } finally {
@@ -96,8 +85,28 @@ export default function AgentHistoryModal({ agent, aiConfig, onClose }: AgentHis
         <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
           {/* AI Section */}
           <div style={{ marginBottom: 24, padding: 16, background: '#1e1b4b', borderRadius: 8, border: '1px solid #3730a3' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: aiSummary ? 12 : 0 }}>
-              <div style={{ color: '#a5b4fc', fontSize: 14, fontWeight: 'bold' }}>🤖 {t.agentHistory.aiAnalysis}</div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: aiSummary ? 12 : 0, flexWrap: 'wrap', gap: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ color: '#a5b4fc', fontSize: 14, fontWeight: 'bold' }}>🤖 {t.agentHistory.aiAnalysis}</div>
+                <select 
+                  value={localProvider} 
+                  onChange={e => setLocalProvider(e.target.value as AIConfig['provider'])}
+                  style={{
+                    background: '#0a1628', color: '#f8fafc', border: '1px solid #3730a3',
+                    borderRadius: 4, padding: '2px 6px', fontSize: 11, outline: 'none',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="none">بدون ذكاء اصطناعي</option>
+                  <option value="gemini">Gemini</option>
+                  <option value="openrouter">OpenRouter</option>
+                  <option value="anthropic">Anthropic (Claude)</option>
+                  <option value="openai">OpenAI</option>
+                  <option value="groq">Groq</option>
+                  <option value="ollama">Ollama (Local)</option>
+                  <option value="custom">Custom Endpoint</option>
+                </select>
+              </div>
               {!aiSummary && (
                 <button 
                   onClick={handleGenerateSummary} 
