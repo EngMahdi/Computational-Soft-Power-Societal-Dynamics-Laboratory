@@ -10,7 +10,8 @@
 </div>
 
 ---
-
+demo 'https://computational-soft-power-societal-d.vercel.app/'
+تجربة النظام 'https://computational-soft-power-societal-d.vercel.app/'
 # 🧪 Soft Power Lab
 
 > **An advanced research platform for simulating complex social systems (Agent-Based Modeling) — studying soft power, cultural dynamics, societal polarization, and media influence.**
