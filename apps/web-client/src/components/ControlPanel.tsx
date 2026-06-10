@@ -21,7 +21,7 @@ interface ControlPanelProps {
   onToggleSubtactic: (theoryKey: TheoryKey, index: number, enabled: boolean) => void;
   onSetTheoryIntensity: (key: TheoryKey, intensity: number) => void;
   onSetAgentCount: (count: number) => void; onSetSpeed: (speed: number) => void;
-  onTriggerEvent: (cat: EventCategory) => void;
+  onTriggerEvent: (cat: EventCategory, duration?: number) => void;
   onExportAllAgents?: () => void;
   onExportInjectedAgents?: () => void;
   onExportAgentSummary?: () => void;
@@ -71,6 +71,7 @@ export default function ControlPanel({
   const { t, locale } = useTranslation();
   const enabledTheoryKeys = theories.filter(th => th.enabled).map(th => th.key);
   const [activeTheoryDoc, setActiveTheoryDoc] = useLocalState<TheoryKey | null>(null);
+  const [eventDuration, setEventDuration] = useLocalState<number>(300);
 
   // ── تحذيرات التعارض ──
   interface ConflictWarning { newKey: TheoryKey; conflictsWith: TheoryKey[]; dismissed: boolean; }
@@ -249,9 +250,21 @@ export default function ControlPanel({
       <section className="control-section events-section">
         <h3>{t.events.title}</h3>
         <p className="section-hint">{t.events.hint}</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+          <span style={{ fontSize: 12, color: '#94a3b8' }}>مدة التأثير (دورات):</span>
+          <input 
+            type="number" min={10} step={10}
+            value={eventDuration}
+            onChange={e => setEventDuration(Math.max(10, parseInt(e.target.value) || 300))}
+            style={{
+              width: 80, background: '#0a1628', color: '#e2e8f0',
+              border: '1px solid #1e3a5f', borderRadius: 4, padding: '4px 8px', fontSize: 12,
+            }}
+          />
+        </div>
         <div className="event-trigger-buttons">
           {(['political','economic','cultural','informational'] as EventCategory[]).map(cat => (
-            <button key={cat} className="btn btn-event" disabled={!isRunning} onClick={() => onTriggerEvent(cat)}>
+            <button key={cat} className="btn btn-event" disabled={!isRunning} onClick={() => onTriggerEvent(cat, eventDuration)}>
               {t.events[EVENT_CATEGORY_LABELS[cat]]}
             </button>
           ))}
@@ -295,7 +308,25 @@ export default function ControlPanel({
       )}
 
       <section className="control-section">
-        <h3>{t.theories.title}</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3>{t.theories.title}</h3>
+          <button 
+            onClick={() => {
+              theories.forEach(th => {
+                if (THEORY_DEFAULT_INTENSITY[th.key] !== undefined) {
+                  onSetTheoryIntensity(th.key, THEORY_DEFAULT_INTENSITY[th.key]);
+                }
+              });
+            }}
+            style={{
+              background: '#1e293b', border: '1px solid #334155', color: '#cbd5e1',
+              padding: '2px 8px', borderRadius: 4, fontSize: 10, cursor: 'pointer',
+            }}
+            title="استعادة القيم التلقائية للشدة المعتمدة على المصادر"
+          >
+            استعادة الضبط التلقائي
+          </button>
+        </div>
         <p className="section-hint">{t.theories.hint}</p>
 
         {/* نافذة توثيق النظرية */}

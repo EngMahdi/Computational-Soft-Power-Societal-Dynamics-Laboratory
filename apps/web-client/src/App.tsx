@@ -395,12 +395,12 @@ export default function App() {
     });
   }, []);
 
-  const triggerEvent = useCallback((cat: 'political' | 'economic' | 'cultural' | 'informational') => {
-    const newEvent = createEvent(cat, 300);
+  const triggerEvent = useCallback((cat: 'political' | 'economic' | 'cultural' | 'informational', duration: number = 300) => {
+    const newEvent = createEvent(cat, duration);
     setSimState(prev => ({
       ...prev,
       events: [...prev.events, newEvent],
-      eventHistory: [...(prev.eventHistory || []), { type: cat, startTick: prev.tick, name: newEvent.id, duration: 300 }]
+      eventHistory: [...(prev.eventHistory || []), { type: cat, startTick: prev.tick, name: newEvent.id, duration: duration }]
     }));
   }, []);
 
@@ -1120,7 +1120,7 @@ export default function App() {
             onSetTheoryIntensity={setTheoryIntensity}
             onSetAgentCount={setAgentCount}
             onSetSpeed={setSimSpeed}
-            onTriggerEvent={triggerEvent}
+            onTriggerEvent={(cat, dur) => triggerEvent(cat, dur ?? 300)}
             province={simState.province}
             onSetProvince={(p) => setSimState(s => ({ ...s, province: p }))}
             onExportAllAgents={handleExportAllAgentsFull}
