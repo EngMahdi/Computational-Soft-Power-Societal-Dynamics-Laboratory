@@ -18,6 +18,15 @@
 Soft Power Lab is built for researchers in sociology, political science, and data engineering. The goal is to simulate **"how societies evolve under competing pressures"** rather than simply modeling who wins.
 
 ---
+### 🤖 Supported LLM Providers & Models
+This simulator is powered by a flexible Multi-Agent architecture that seamlessly integrates with the world's most advanced AI models:
+
+- **OpenRouter:** Access to 300+ models including **DeepSeek-V3**, **Llama 3.1 (70B/8B)**, **Llama 3.2**, and **Mistral Large 2**.
+- **Google DeepMind (Gemini):** Native support for **Gemini 3.5 Flash** and **Gemini 3.1 Pro**.
+- **OpenAI:** Fully compatible with **GPT-4o**, **GPT-4o-mini**, and **5._**.
+- **Anthropic:** Powered by **Claude 4.8 Sonnet** and **Claude 4.8 opus**.
+- **Groq:** Ultra-fast real-time inference using LPU engine.
+- **Local AI:** Complete privacy support for local inference via **Ollama**, **LM Studio**, and **vLLM**.
 
 ## 🌟 Core Features
 
