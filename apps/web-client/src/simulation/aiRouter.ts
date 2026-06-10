@@ -575,8 +575,22 @@ export async function testAIConnection(config: AIConfig): Promise<{
       const d = await res.json() as { choices: { message: { content: string } }[] };
       raw = d.choices?.[0]?.message?.content ?? '';
     } else {
-      return { success: false, duration_ms: Date.now() - start,
-        model: config.provider, response: '', error: 'استخدم زر "فحص الاتصال" للمزودات الأخرى' };
+      // For all other OpenAI-compatible and Anthropic/Gemini endpoints, we already have checkAPIConnection
+      // but testAIConnection sends a real prompt using the standard callAI method.
+      const testTask: AITask = {
+        type: 'anomaly_judgment',
+        anomaly: undefined, // undefined anomaly will trigger a simple prompt in callAI if we bypass manager
+        complexity: 0,
+        agentIndex: -1,
+        context: TEST_PROMPT,
+      };
+      
+      const record = await callAI(testTask, config);
+      if (record.status === 'error' || record.status === 'timeout') {
+         throw new Error(record.error || 'Connection failed or timed out');
+      }
+      
+      raw = record.result?.reasoning || JSON.stringify(record.result);
     }
 
     return {

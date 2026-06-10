@@ -297,8 +297,17 @@ export default function App() {
   const [inspectedAgent, setInspectedAgent] = useState<InspectableAgent | null>(null);
   const [agentGroups, setAgentGroups] = useState<AgentGroup[]>([]);
 
-  // ── حالة طبقة الذكاء الاصطناعي ──
-  const [aiConfig, setAiConfig] = useState<AIConfig>(defaultAIConfig);
+  const [aiConfig, setAiConfig] = useState<AIConfig>(() => {
+    const saved = localStorage.getItem('softpower_aiconfig');
+    if (saved) {
+      try { return { ...defaultAIConfig, ...JSON.parse(saved) }; } catch (e) {}
+    }
+    return defaultAIConfig;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('softpower_aiconfig', JSON.stringify(aiConfig));
+  }, [aiConfig]);
   const [aiAlerts, setAiAlerts] = useState<AIAlert[]>([]);
   const [currentAnomalies, setCurrentAnomalies] = useState<Anomaly[]>([]);
   const [aiCallHistory, setAiCallHistory] = useState<AICallRecord[]>([]);

@@ -415,7 +415,7 @@ export default function AIPanel({
           )}
 
           {/* ── زر اختبار حقيقي ── */}
-          {(config.provider==='ollama' || config.provider==='custom') && (
+          {(config.provider !== 'none') && (
             <div style={{marginBottom:10}}>
               <button onClick={handleTestConnection} disabled={isTestRunning}
                 style={{
